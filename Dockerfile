@@ -3,17 +3,18 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Backend
-COPY backend/package.json backend/package.json
-RUN cd backend && npm install
+COPY backend/package*.json ./backend/
+RUN cd backend && npm ci --only=production
 
-# Frontend (build)
-COPY frontend frontend
-RUN cd frontend && npm install && npm run build
+# Frontend build
+COPY frontend/package*.json ./frontend/
+RUN cd frontend && npm ci
 
-# Setup
-COPY backend/src backend/src
-COPY docs docs
+COPY backend ./backend
+COPY frontend ./frontend
+
+RUN cd frontend && npm run build
 
 EXPOSE 3001 3000
 
-CMD ["sh", "-c", "cd backend && npm start"]
+CMD ["sh", "-c", "cd backend && npm start & cd frontend && npm start"]

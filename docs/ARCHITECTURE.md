@@ -1,28 +1,55 @@
-# Architecture
+# Agent Command Center Architecture
 
-## Backend (Node.js + Express)
+## Overview
+Real-time oversight dashboard for autonomous AI agents.
 
-- **Database**: SQLite (in-memory for MVP)
-- **WebSocket**: Real-time activity streaming
-- **API**: RESTful endpoints + WebSocket events
+## Components
 
-## Frontend (React)
+### Backend (Node.js + Express)
+- SQLite database for audit logs, activities, rules
+- WebSocket server for real-time updates
+- RESTful API for agent control
 
-- **Framework**: React 18
-- **Styling**: CSS Grid + custom dark theme
-- **Communication**: Fetch API + WebSocket
+**Endpoints:**
+- `GET /api/agents` - List all agents
+- `GET /api/activities` - Activity log
+- `POST /api/activities` - Log new activity
+- `GET /api/rules/:agent_id` - Get agent rules
+- `POST /api/rules` - Add/update rule
+- `POST /api/override` - Emergency override
+- `GET /api/audit/:agent_id` - Audit trail
 
-## Data Flow
+### Frontend (React)
+- Real-time activity viewer
+- Rule editor UI
+- Emergency override controls
+- Dark-themed dashboard
 
-1. Agent takes action → logs to `/api/activities`
-2. Backend stores in SQLite
+### Agent Integration
+Agents log activities by POSTing to `/api/activities`:
+
+```javascript
+fetch('http://localhost:3001/api/activities', {
+  method: 'POST',
+  body: JSON.stringify({
+    agent_id: 'clawdy',
+    action: 'trade_executed',
+    details: JSON.stringify({ token: 'PUNCH', amount: 0.01 })
+  })
+});
+```
+
+### Database Schema
+- **activities** - All agent actions
+- **agents** - Agent metadata
+- **rules** - Agent rules/config
+- **audit_log** - Override history
+
+## Real-Time Flow
+1. Agent takes action
+2. POSTs to `/api/activities`
 3. Backend broadcasts via WebSocket
-4. Frontend receives in real-time
-5. User can override via `/api/override`
+4. Frontend updates instantly (no refresh)
 
-## Security Considerations
-
-- [ ] Auth tokens for API
-- [ ] Encrypted WebSocket
-- [ ] Audit logging for all overrides
-- [ ] Rate limiting on critical endpoints
+## Deployment
+See DEPLOYMENT.md
